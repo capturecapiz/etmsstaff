@@ -26,6 +26,11 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
+        // flutter_local_notifications requires Java 8+ core library
+        // desugaring to be enabled on Android, regardless of the app's own
+        // source/target compatibility — see the "core library desugaring"
+        // dependency added below.
+        coreLibraryDesugaringEnabled true
     }
 
     kotlinOptions {
@@ -61,6 +66,13 @@ android {
 
 flutter {
     source "../.."
+}
+
+dependencies {
+    // Required by flutter_local_notifications' AAR metadata check above —
+    // backports newer java.time/java.util APIs so they work down to this
+    // app's minSdkVersion 21.
+    coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:2.1.4"
 }
 
 // Push notifications (Firebase Cloud Messaging) need this file, which
