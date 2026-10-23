@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import '../models/task_item.dart';
 import '../services/session.dart';
 import '../services/edmate_service.dart';
 import '../services/api_client.dart';
