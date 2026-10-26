@@ -1,0 +1,15 @@
+# Copy this file to "key.properties" (same folder) and fill in the real
+# values if you want to build+sign a release App Bundle/APK locally on your
+# own machine with `flutter build appbundle --release`.
+#
+# "key.properties" itself is gitignored on purpose — never commit it, it
+# contains your real keystore passwords.
+#
+# This is NOT needed to use the GitHub Actions build — that workflow gets
+# the same information from GitHub repo secrets instead (see the "Release
+# signing" section of API_SETUP.md).
+
+storeFile=/absolute/path/to/your/upload-keystore.jks
+storePassword=REPLACE_ME
+keyAlias=REPLACE_ME
+keyPassword=REPLACE_ME
