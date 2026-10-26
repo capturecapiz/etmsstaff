@@ -85,7 +85,7 @@ android {
     defaultConfig {
         // Change this if you want a different package id on the Play
         // Store / device later — for a sideloaded APK it can stay as-is.
-        applicationId "com.ptcao.edmate"
+        applicationId "ptcao.etms.com"
         minSdkVersion 21
         targetSdkVersion 36
         versionCode flutterVersionCode.toInteger()
