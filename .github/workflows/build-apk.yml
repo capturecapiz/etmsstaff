@@ -1,9 +1,21 @@
 name: Build Android APK
 
-# Builds a real, installable .apk entirely on GitHub's own servers — no
-# Flutter/Android Studio install needed on your PC. Push this project to a
-# GitHub repo (free account is fine) and this runs automatically; download
-# the APK from the finished run's "Artifacts" section.
+# Builds a real, installable .apk AND a Play-Store-ready .aab app bundle
+# entirely on GitHub's own servers — no Flutter/Android Studio install
+# needed on your PC. Push this project to a GitHub repo (free account is
+# fine) and this runs automatically; download either artifact from the
+# finished run's "Artifacts" section.
+#
+# Release signing: if the repo secrets below are set (Settings -> Secrets
+# and variables -> Actions -> "New repository secret"), both the APK and
+# the App Bundle are signed with your real upload key, which Google Play
+# requires (a debug-signed bundle is rejected, even for internal testing).
+# If these secrets aren't set yet, the build still succeeds but falls back
+# to debug signing — fine for sideloading, not accepted by Play Console.
+#   ANDROID_KEYSTORE_BASE64   - `base64 -w0 your-keystore.jks` output
+#   ANDROID_KEYSTORE_PASSWORD - the keystore's store password
+#   ANDROID_KEY_ALIAS         - the key alias inside that keystore
+#   ANDROID_KEY_PASSWORD      - the key's password (often same as above)
 on:
   push:
     branches: [main, master]
@@ -21,9 +33,32 @@ jobs:
 
       - run: flutter pub get
 
+      - name: Decode release keystore
+        if: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' }}
+        env:
+          KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: echo "$KEYSTORE_B64" | base64 -d > "$GITHUB_WORKSPACE/upload-keystore.jks"
+
       - run: flutter build apk --release
+        env:
+          ANDROID_KEYSTORE_PATH: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' && format('{0}/upload-keystore.jks', github.workspace) || '' }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+
+      - run: flutter build appbundle --release
+        env:
+          ANDROID_KEYSTORE_PATH: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' && format('{0}/upload-keystore.jks', github.workspace) || '' }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
 
       - uses: actions/upload-artifact@v4
         with:
           name: edmate-staff-app
           path: build/app/outputs/flutter-apk/app-release.apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: edmate-staff-app-bundle
+          path: build/app/outputs/bundle/release/app-release.aab
